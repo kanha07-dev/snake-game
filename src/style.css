@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Inter', Arial, sans-serif; /* Using Inter font */
+    color: #fff;
+  }
+  canvas {
+    border: 4px solid #b71c1c;
+    border-radius: 12px;
+    background: repeating-linear-gradient(
+      45deg,
+      #2e7d32,
+      #2e7d32 20px,
+      #388e3c 20px,
+      #388e3c 40px
+    );
+    display: block;
+    /* This makes the canvas scale down on smaller screens while maintaining aspect ratio */
+    max-width: 95vmin; /* Use vmin to fit within viewport width or height */
+    max-height: 95vmin;
+  }
+  .scoreboard {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    font-size: 18px;
+    color: #fff;
+    background: rgba(0,0,0,0.5); /* Semi-transparent background */
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 10; /* Ensure it's above canvas */
+  }
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    font-size: 26px;
+    text-align: center;
+    border-radius: 12px; /* Match canvas border radius */
+    z-index: 20; /* Ensure it's above scoreboard */
+  }
+  .overlay h1 {
+    font-size: 3em; /* Larger title */
+    margin-bottom: 20px;
+    color: #d32f2f; /* Red color for title */
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+  }
+  .overlay p {
+    margin: 10px 0;
+    font-size: 1.2em;
+  }
+  .overlay button {
+    margin: 10px;
+    padding: 12px 25px; /* Slightly larger buttons */
+    font-size: 22px;
+    background: #d32f2f;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for all properties */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Subtle shadow */
+    position: relative;
+    overflow: hidden;
+  }
+  .overlay button:hover {
+    background: #b71c1c;
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+  }
+  .overlay button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
