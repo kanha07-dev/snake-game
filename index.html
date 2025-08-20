@@ -1,139 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<title>Red & Black Snake</title>
-<link rel="stylesheet" href="src/style.css" />
-<link rel="icon" href="src/favicon.png" type="image/x-icon" />
-<style>
-  body {
-    margin: 0;
-    background: #000;
-    color: white;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-  }
-
-  .scoreboard {
-    display: flex;
-    justify-content: space-between;
-    width: 90%;
-    max-width: 600px;
-    margin: 10px auto;
-    font-size: 18px;
-  }
-
-  #gameCanvas {
-    background: #111;
-    flex: 1;
-    max-width: 600px;
-    width: 100%;
-    aspect-ratio: 1/1; /* keeps square shape */
-    border: 2px solid #444;
-  }
-
-  .overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-  }
-
-  .overlay h1 { font-size: 2rem; margin-bottom: 1rem; }
-  .overlay button {
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 8px;
-    background: crimson;
-    color: white;
-    cursor: pointer;
-  }
-
-  /* Mobile touch controls */
-  .controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 10px 0;
-    gap: 10px;
-  }
-  .control-row {
-    display: flex;
-    gap: 20px;
-  }
-  .control-btn {
-    width: 60px;
-    height: 60px;
-    background: #333;
-    border-radius: 50%;
-    font-size: 24px;
-    border: 2px solid #666;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-  }
-  .control-btn:active { background: crimson; }
-</style>
+    <title>Snake Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #gameCanvas {
+            border: 1px solid black;
+            background-color: #fff;
+        }
+        #controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-<div class="scoreboard">
-  <div id="scoreText">Score: 0</div>
-  <div id="bestScoreText">Best: 0</div>
-  <div id="lastScoreText">Last: 0</div>
-</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="score">Score: 0</div>
+    <div id="controls" style="display: flex;">
+        <button id="upBtn">Up</button><button id="downBtn">Down</button><button id="leftBtn">Left</button><button id="rightBtn">Right</button>
+    </div>
 
-<canvas id="gameCanvas"></canvas>
-
-<!-- Start Screen -->
-<div id="startOverlay" class="overlay">
-  <h1>🐍 Red & Black Snake</h1>
-  <p>Choose Difficulty:</p>
-  <div>
-    <button onclick="startGame('easy')">Easy</button>
-    <button onclick="startGame('medium')">Medium</button>
-    <button onclick="startGame('hard')">Hard</button>
-  </div>
-  <p>Use Arrow Keys or Touch Controls</p>
-</div>
-
-<!-- Game Over Screen -->
-<div id="gameOverOverlay" class="overlay" style="display:none;">
-  <h1>💀 Game Over</h1>
-  <p id="finalScore"></p>
-  <button onclick="restartGame()">Restart</button>
-</div>
-
-<!-- Mobile Controls -->
-<div class="controls">
-  <button class="control-btn" onclick="setDirection('up')">⬆️</button>
-  <div class="control-row">
-    <button class="control-btn" onclick="setDirection('left')">⬅️</button>
-    <button class="control-btn" onclick="setDirection('right')">➡️</button>
-  </div>
-  <button class="control-btn" onclick="setDirection('down')">⬇️</button>
-</div>
-
-<script type="module" src="src/script.js"></script>
-<script>
-  // Touch control integration with snake game
-  function setDirection(dir) {
-    const event = new KeyboardEvent("keydown", {
-      key: dir === "up" ? "ArrowUp" : dir === "down" ? "ArrowDown" : dir === "left" ? "ArrowLeft" : "ArrowRight"
-    });
-    window.dispatchEvent(event);
-  }
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
