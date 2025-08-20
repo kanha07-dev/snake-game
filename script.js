@@ -1,165 +1,202 @@
-// script.js
-
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+const currentScoreEl = document.getElementById('current-score');
+const bestScoreEl = document.getElementById('best-score');
+const gameOverContainer = document.getElementById('game-over-container');
+const finalScoreEl = document.getElementById('final-score');
+const restartButton = document.getElementById('restart-button');
 
-// Game variables
-let gridSize;
+const gridSize = 20;
+let canvasSize;
+
+function setCanvasSize() {
+    const size = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.6);
+    canvas.width = Math.floor(size / gridSize) * gridSize;
+    canvas.height = canvas.width;
+    canvasSize = canvas.width;
+}
+
 let snake = [{ x: 10, y: 10 }];
-let food = { x: 5, y: 5 };
+let fruit = {};
+let direction = { x: 0, y: 0 };
 let score = 0;
-let gameSpeed = 100; // Initial game speed
-let isGameOver = false;
+let bestScore = localStorage.getItem('bestScore') || 0;
+let level = 1;
+let speed = 200; // ms per move
+let lastMoveTime = 0;
+let gameOver = false;
 
-let dx = 1; // Horizontal velocity
-let dy = 0; // Vertical velocity
+const fruits = ['🍎', '🍊', '🍇', '🍉', '🍓', '🍒', '🍑', '🍍'];
+const snakeHeadEmoji = '🐍';
+const snakeBodyEmoji = '🟢';
 
-// Function to draw the snake
-function drawSnake() {
-    if (isGameOver) return;
-    snake.forEach(segment => {
-        ctx.fillStyle = 'green';
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
-    });
+function getSpeedForLevel(level) {
+    if (level === 1) return 200;
+    if (level === 2) return 150;
+    if (level === 3) return 100;
+    return 100;
 }
 
-// Function to draw the food
-function drawFood() {
-    if (isGameOver) return;
-    ctx.fillStyle = 'red';
-    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
-}
-
-// Function to check collision with wall
-function checkWallCollision() {
-    const head = snake[0];
-    if (head.x < 0 ||
-        head.x >= canvas.width / gridSize ||
-        head.y < 0 ||
-        head.y >= canvas.height / gridSize) {
-        return true;
+function updateLevel() {
+    if (score >= 20 && level < 3) {
+        level = 3;
+    } else if (score >= 10 && level < 2) {
+        level = 2;
     }
-    return false;
+    speed = getSpeedForLevel(level);
 }
 
-function checkSelfCollision() {
-    const head = snake[0];
-    for (let i = 1; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function gameOver() {
-    isGameOver = true;
-    alert(`Game Over! Your score: ${score}`);
-    resetGame();
-}
-
-// Function to reset the game
-function resetGame() {
-    snake = [{ x: 10, y: 10 }];
-    food = generateFood();
-    dx = 1;
-    dy = 0;
-    score = 0;
-    gameSpeed = 100;
-    isGameOver = false;
-    updateScore();
-}
-
-// Function to generate food at a random location
-function generateFood() {
-    let newFood = {
-        x: Math.floor(Math.random() * (canvas.width / gridSize)),
-        y: Math.floor(Math.random() * (canvas.height / gridSize))
+function generateFruit() {
+    fruit = {
+        x: Math.floor(Math.random() * (canvasSize / gridSize)),
+        y: Math.floor(Math.random() * (canvasSize / gridSize)),
+        emoji: fruits[Math.floor(Math.random() * fruits.length)]
     };
-    return newFood;
 }
 
-// Function to update the score
-function updateScore() {
-    document.getElementById('score').innerText = `Score: ${score}`;
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw fruit
+    ctx.font = `${gridSize}px Arial`;
+    ctx.fillText(fruit.emoji, fruit.x * gridSize, (fruit.y + 1) * gridSize);
+
+    // Draw snake
+    snake.forEach((segment, index) => {
+        const emoji = index === 0 ? snakeHeadEmoji : snakeBodyEmoji;
+        ctx.fillText(emoji, segment.x * gridSize, (segment.y + 1) * gridSize);
+    });
 }
 
 function update() {
-  if (isGameOver) return;
-  const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    if (gameOver) return;
 
-  if (checkWallCollision() || checkSelfCollision()) {
-      gameOver();
-      return;
-  }
+    const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-  snake.unshift(head); // Add the new head to the snake
-  snake.pop(); // Remove the tail
+    // Wall collision
+    if (head.x < 0 || head.x >= canvasSize / gridSize || head.y < 0 || head.y >= canvasSize / gridSize) {
+        endGame();
+        return;
+    }
+
+    // Self collision
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+            endGame();
+            return;
+        }
+    }
+
+    snake.unshift(head);
+
+    // Fruit collision
+    if (head.x === fruit.x && head.y === fruit.y) {
+        score++;
+        updateLevel();
+        generateFruit();
+    } else {
+        snake.pop();
+    }
+
+    currentScoreEl.textContent = score;
 }
 
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp') {
-        dx = 0;
-        dy = -1;
-    }
-    });
-document.getElementById('downBtn').addEventListener('click', () => {
-  dx = 0;
-  dy = 1;
-    });
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowDown') {
-        dx = 0;
-        dy = 1;
-    }
-    });
+function gameLoop(currentTime) {
+    if (gameOver) return;
 
-document.getElementById('leftBtn').addEventListener('click', () => {
-    dx = -1;
-    dy = 0;
+    if (currentTime - lastMoveTime > speed) {
+        lastMoveTime = currentTime;
+        update();
+        draw();
+    }
+    requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+    setCanvasSize();
+    snake = [{ x: 10, y: 10 }];
+    direction = { x: 0, y: 0 };
+    score = 0;
+    level = 1;
+    speed = getSpeedForLevel(level);
+    gameOver = false;
+    gameOverContainer.classList.add('hidden');
+    currentScoreEl.textContent = score;
+    bestScoreEl.textContent = bestScore;
+    generateFruit();
+    requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+    gameOver = true;
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+    }
+    finalScoreEl.textContent = score;
+    gameOverContainer.classList.remove('hidden');
+}
+
+// Event Listeners
+document.addEventListener('keydown', e => {
+    switch (e.key) {
+        case 'ArrowUp':
+            if (direction.y === 0) direction = { x: 0, y: -1 };
+            break;
+        case 'ArrowDown':
+            if (direction.y === 0) direction = { x: 0, y: 1 };
+            break;
+        case 'ArrowLeft':
+            if (direction.x === 0) direction = { x: -1, y: 0 };
+            break;
+        case 'ArrowRight':
+            if (direction.x === 0) direction = { x: 1, y: 0 };
+            break;
+    }
 });
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
-        dx = -1;
-        dy = 0;
-    }
-    });
-document.getElementById('rightBtn').addEventListener('click', () => {
-    dx = 1;
-    dy = 0;
-});
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowRight') {
-        dx = 1;
-        dy = 0;
-    }
+
+// Touch controls
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
 });
 
-// Function to handle window resize
-function handleResize() {
-    canvas.width = window.innerWidth * 0.8;  // Adjust as needed
-    canvas.height = window.innerHeight * 0.8; // Adjust as needed
-    gridSize = Math.min(20, Math.floor(canvas.width / 20), Math.floor(canvas.height / 20)); // Maximum gridSize of 20
-}
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!touchStartX || !touchStartY) {
+        return;
+    }
 
-// Call handleResize initially and on window resize
-window.addEventListener('resize', handleResize);
-handleResize(); // Initial setup
+    let touchEndX = e.touches[0].clientX;
+    let touchEndY = e.touches[0].clientY;
 
-// Initialize the game
-function init() {
-    handleResize();
-    food = generateFood();
-    updateScore();
-}
+    let diffX = touchEndX - touchStartX;
+    let diffY = touchEndY - touchStartY;
 
-// Main game loop
-function gameLoop() {
-  update();
-  draw();
-  setTimeout(gameLoop, gameSpeed); // Adjust speed as needed
-}
+    if (Math.abs(diffX) > Math.abs(diffY)) { // Horizontal swipe
+        if (diffX > 0 && direction.x === 0) {
+            direction = { x: 1, y: 0 };
+        } else if (diffX < 0 && direction.x === 0) {
+            direction = { x: -1, y: 0 };
+        }
+    } else { // Vertical swipe
+        if (diffY > 0 && direction.y === 0) {
+            direction = { x: 0, y: 1 };
+        } else if (diffY < 0 && direction.y === 0) {
+            direction = { x: 0, y: -1 };
+        }
+    }
 
-init();
+    touchStartX = 0;
+    touchStartY = 0;
+});
 
-gameLoop();
+
+restartButton.addEventListener('click', startGame);
+window.addEventListener('resize', startGame);
+
+startGame();

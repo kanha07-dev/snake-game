@@ -1,36 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Snake Game</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        #gameCanvas {
-            border: 1px solid black;
-            background-color: #fff;
-        }
-        #controls button {
-            margin: 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <div id="score">Score: 0</div>
-    <div id="controls" style="display: flex;">
-        <button id="upBtn">Up</button><button id="downBtn">Down</button><button id="leftBtn">Left</button><button id="rightBtn">Right</button>
+    <h1>Snake Game</h1>
+    <div class="scores">
+        <div>Score: <span id="current-score">0</span></div>
+        <div>Best Score: <span id="best-score">0</span></div>
     </div>
-
+    <canvas id="game-canvas"></canvas>
+    <div id="game-over-container" class="hidden">
+        <h2>Game Over</h2>
+        <p>Your score: <span id="final-score"></span></p>
+        <button id="restart-button">Restart</button>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
